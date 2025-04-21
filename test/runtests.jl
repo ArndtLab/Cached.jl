@@ -62,6 +62,15 @@ end
 			@test c[hash(obj)] == obj
 		end
 		println(summary(c))
+
+		c = Cached.SQLiteCache(p)
+		@test length(c) == length(objs)
+		@test length(c.loaded) == 0
+        Cached.loadall!(c)
+        @test length(c.loaded) == length(objs)
+		for obj in objs
+			@test c[hash(obj)] == obj
+		end
 	end
 end
 

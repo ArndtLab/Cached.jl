@@ -230,6 +230,25 @@ function close!(cache::SQLiteCache)
     DBInterface.close!(cache.db)
 end
 
+"""
+    loadall!(cache::SQLiteCache)
+
+Load all items from the SQLite database into memory.
+"""
+function loadall!(cache::SQLiteCache)
+
+    s = SQLite.Stmt(cache.db, "SELECT * FROM KeyValue;")
+    res = DBInterface.execute(s)
+
+    for row in res
+        key = row[1]
+        value = row[2]
+        io = IOBuffer(value, read=true, write=false)
+        cache.loaded[key] = deserialize(io)
+    end
+    cache
+end
+
 
 function Base.summary(io::IO, cache::SQLiteCache)
     size = filesize(cache.path)
