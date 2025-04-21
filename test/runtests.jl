@@ -71,6 +71,11 @@ end
 		for obj in objs
 			@test c[hash(obj)] == obj
 		end
+
+
+		cd = Cached.DictCache(c)
+		@test length(cd) == length(objs)
+		@test all(cd[hash(obj)] == obj for obj in objs)
 	end
 end
 

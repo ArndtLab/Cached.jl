@@ -257,3 +257,8 @@ function Base.summary(io::IO, cache::SQLiteCache)
     print(io, "$(typeof(cache)) at $(cache.path)")
     print(io, ": $(length(cache.loaded)) items in memory, $(length(cache)) items on disk, $(human_size) on disk")
 end 
+
+
+function DictCache(s::SQLiteCache)
+    return DictCache(deepcopy(s.loaded))
+end
