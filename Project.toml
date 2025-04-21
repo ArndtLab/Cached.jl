@@ -1,0 +1,7 @@
+name = "Cached"
+uuid = "2d46be0c-4722-452f-bf20-6f7cf69fbcab"
+authors = ["Peter Arndt <arndt@molgen.mpg.de> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.10"
