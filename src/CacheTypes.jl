@@ -231,7 +231,7 @@ function close!(cache::SQLiteCache)
 end
 
 """
-    loadall!(cache::SQLiteCache)
+    Cached.loadall!(cache::SQLiteCache)
 
 Load all items from the SQLite database into memory.
 """
@@ -248,6 +248,26 @@ function loadall!(cache::SQLiteCache)
     end
     cache
 end
+
+
+
+"""
+    Cached.drop_unused!(cache::SQLiteCache)
+
+Drop all items from the SQLite database that are not in memory.
+"""
+function drop_unused!(cache::SQLiteCache)
+    valid_ids = collect(keys(cache.loaded))
+
+    # Build the SQL query with placeholders
+    placeholders = join(("?" for _ in valid_ids), ", ")
+    query = "DELETE FROM KeyValue WHERE key NOT IN ($placeholders)"
+
+    # Execute the query with parameters
+    DBInterface.execute(cache.db, query, valid_ids)
+    cache
+end
+
 
 
 function Base.summary(io::IO, cache::SQLiteCache)
