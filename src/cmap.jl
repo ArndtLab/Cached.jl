@@ -32,7 +32,7 @@ function cmap(f, cache::AbstractCache, c;
         val
     end
     if length(keys_to_save) > 0
-        setindices!(cache, keys_to_save, view(vals, ids_to_save))
+        setindices!(cache, view(vals, ids_to_save), keys_to_save)
     end
     vals
 end
