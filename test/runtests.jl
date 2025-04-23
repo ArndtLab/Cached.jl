@@ -80,6 +80,48 @@ end
 end
 
 
+@testitem "SqliteCache Droping" begin
+    objs = [true, false, 2, 3.0, π, (1,2), (3.1415, π), [1,2,3], [π, 3.1415], 
+			Dict(1=>2, 3=>4), Dict(π=>3.1415, 3.1415=>π), 
+			"hello", "world", "π", "πππ"]
+
+	mktempdir() do d
+		p = joinpath(d, "a1.sqlite")
+		c = Cached.SQLiteCache(p)
+
+		for obj in objs
+			c[hash(obj)] = obj
+		end
+
+		@test length(c) == length(objs)
+		Cached.close!(c)
+
+
+		c = Cached.SQLiteCache(p)
+		@test length(c) == length(objs)
+		@test length(c.loaded) == 0
+
+		n = 4
+		for obj in objs[1:n]
+			@test c[hash(obj)] == obj
+		end
+		@test length(c.loaded) == n
+		@test length(c) == length(objs)
+
+		Cached.drop_unused!(c)
+
+		@test length(c.loaded) == n
+		@test length(c) == n
+		for obj in objs[n+1:end]
+			@test haskey(c, hash(obj)) == false
+		end
+
+	end
+
+end
+
+
+
 @testitem "FileCache" begin
 
     objs = [true, false, 2, 3.0, π, (1,2), (3.1415, π), [1,2,3], [π, 3.1415], 
