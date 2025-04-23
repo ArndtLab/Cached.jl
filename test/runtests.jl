@@ -121,6 +121,33 @@ end
 end
 
 
+@testitem "SqliteCache from DictCache" begin
+    objs = [true, false, 2, 3.0, π, (1,2), (3.1415, π), [1,2,3], [π, 3.1415], 
+			Dict(1=>2, 3=>4), Dict(π=>3.1415, 3.1415=>π), 
+			"hello", "world", "π", "πππ"]
+
+	mktempdir() do d
+		dc = Cached.DictCache()
+
+		for obj in objs
+			dc[hash(obj)] = obj
+		end
+		@test length(dc) == length(objs)
+
+
+		p = joinpath(d, "a1.sqlite")
+		c = Cached.SQLiteCache(p, dc)
+		@test length(c) == length(objs)
+		@test length(c.loaded) == 15
+		@test length(c) == length(objs)
+		empty!(dc.cache)
+		empty!(c.loaded)
+		for obj in objs
+			@test c[hash(obj)] == obj
+		end
+
+	end
+end
 
 @testitem "FileCache" begin
 
@@ -214,21 +241,21 @@ end
 
 	mktempdir() do d
 		c = Cached.DictCache()
-		Cached.setindices!(c, hash.(objs), objs)
+		Cached.setindices!(c, objs, hash.(objs))
 		@test length(c) == length(objs)
 		for obj in objs
 			@test c[hash(obj)] == obj
 		end
 
 		c = Cached.SQLiteCache(joinpath(d, "a.sqlite"))
-		Cached.setindices!(c, hash.(objs), objs)
+		Cached.setindices!(c, objs, hash.(objs))
 		@test length(c) == length(objs)
 		for obj in objs
 			@test c[hash(obj)] == obj
 		end
 
 		c = Cached.FileCache(joinpath(d, "a1"))
-		Cached.setindices!(c, hash.(objs), objs)
+		Cached.setindices!(c, objs, hash.(objs))
 		@test length(c) == length(objs)
 		for obj in objs
 			@test c[hash(obj)] == obj

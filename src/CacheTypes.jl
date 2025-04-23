@@ -4,7 +4,7 @@ abstract type AbstractCache end
 Base.show(io::IO, cache::AbstractCache) = print(io, "$(typeof(cache))")
 
 
-function setindices!(cache::AbstractCache, keys::Vector{UInt}, values::AbstractVector)
+function setindices!(cache::AbstractCache, values, keys::Vector{UInt})
     for (key, value) in zip(keys, values)
         cache[key] = value
     end
@@ -172,6 +172,14 @@ function SQLiteCache(path::AbstractString; clear = false)
     return SQLiteCache(path, db, s1, s2, s3, Dict{UInt64, Any}())
 end
 
+
+function SQLiteCache(path::AbstractString, cache::DictCache; clear = true)
+    scache = SQLiteCache(path; clear)
+    setindices!(scache, values(cache.cache), collect(keys(cache.cache)))
+    return scache
+end
+
+
 Base.show(io::IO, cache::SQLiteCache) = print(io, "$(typeof(cache)) at $(cache.path)")
 
 
@@ -190,7 +198,7 @@ function Base.setindex!(cache::SQLiteCache, value, key::UInt64)
     DBInterface.execute(cache.write_statement, (key, take!(io)))
 end
 
-function setindices!(cache::SQLiteCache, keys::Vector{UInt}, values::AbstractVector)
+function setindices!(cache::SQLiteCache, values, keys::Vector{UInt64})
     svalues = Base.map(keys, values) do k, v
         cache.loaded[k] = v
         io = IOBuffer()
