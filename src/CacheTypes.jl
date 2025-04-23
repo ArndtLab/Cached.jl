@@ -259,6 +259,9 @@ function Base.summary(io::IO, cache::SQLiteCache)
 end 
 
 
-function DictCache(s::SQLiteCache)
-    return DictCache(deepcopy(s.loaded))
-end
+
+
+
+# function DictCache(s::SQLiteCache)
+#     return DictCache(deepcopy(s.loaded))
+# end
