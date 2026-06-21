@@ -85,4 +85,4 @@ Or from the Julia REPL package mode (press `]`):
 pkg> add Cached
 ```
 
-Requires Julia 1.10 or later.
+Requires Julia 1.11 or later.
