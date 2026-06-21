@@ -22,7 +22,16 @@ end
 """
     DictCache()
 
-A cache that stores items in memory only.
+A cache that stores items in memory using a `Dict`. Items are not persisted and
+are lost when the Julia process ends.
+
+# Examples
+```julia
+using Cached
+
+cache = DictCache()
+cmap(x -> x^2, cache, 1:5)
+```
 """
 struct DictCache <: AbstractCache
     cache::Dict{UInt64, Any}
@@ -42,6 +51,25 @@ end
 
 
 
+"""
+    FileCache(dir::AbstractString; clear = false, gitignore = true)
+
+A cache that persists items to disk inside `dir` using Julia's `Serialization` module.
+Each item is stored as a separate file named by the hash of its key.
+Items are also cached in memory after first access to avoid redundant deserialization.
+
+If `clear = true`, the directory is removed and recreated on construction.
+If `gitignore = true` (default), a `.gitignore` is written to `dir` so that
+cached files are excluded from version control.
+
+# Examples
+```julia
+using Cached
+
+cache = FileCache("my_cache")
+cmap(x -> x^2, cache, 1:5)
+```
+"""
 struct FileCache <: AbstractCache
     dir::String
     loaded::Dict{UInt64, Any}
@@ -131,6 +159,27 @@ end
 
 
 
+"""
+    SQLiteCache(path::AbstractString; clear = false)
+
+A cache that persists items to a SQLite database file at `path` using Julia's
+`Serialization` module. Items are also cached in memory after first access to
+avoid redundant deserialization.
+
+SQLite's WAL mode is not enabled by default, but the busy timeout is set to
+1000 ms, making `SQLiteCache` tolerant of brief contention from concurrent processes.
+
+If `clear = true`, any existing database file at `path` is removed before a
+new one is created.
+
+# Examples
+```julia
+using Cached
+
+cache = SQLiteCache("my_cache.sqlite")
+cmap(x -> x^2, cache, 1:5)
+```
+"""
 mutable struct SQLiteCache <: AbstractCache
     path::String
     db::SQLite.DB
