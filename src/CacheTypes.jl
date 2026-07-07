@@ -1,3 +1,38 @@
+"""
+    AbstractCache
+
+Supertype for all cache backends in `Cached.jl`.
+
+A cache maps `UInt64` hash keys to arbitrary values. Concrete subtypes persist
+results so that expensive function calls can be skipped on subsequent runs —
+even across Julia sessions when a persistent backend is used.
+
+# Interface
+
+Subtypes must implement:
+
+| Method | Description |
+|--------|-------------|
+| `cache[key::UInt64]` | Retrieve a stored value by key. |
+| `cache[key::UInt64] = value` | Store a value under a key. |
+| `haskey(cache, key::UInt64)` | Return `true` if the key exists. |
+| `length(cache)` | Return the number of stored items. |
+
+# Provided subtypes
+
+- [`DictCache`](@ref) — in-memory storage backed by a `Dict`.
+- [`FileCache`](@ref) — persistent storage on disk using `Serialization`.
+- [`SQLiteCache`](@ref) — persistent storage in a SQLite database.
+
+# Examples
+```julia
+using Cached
+
+cache = DictCache()             # or FileCache("dir"), SQLiteCache("db.sqlite")
+cmap(x -> x^2, cache, 1:5)     # compute and cache
+cmap(x -> x^2, cache, 1:5)     # results retrieved from cache, f not called
+```
+"""
 abstract type AbstractCache end
 
 
