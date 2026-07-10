@@ -188,7 +188,7 @@ function pcmap(f, p::AbstractWorkerPool, cache::AbstractCache, c;
     return getindex.(Ref(cache), vals)
 end
 
-pcmap(f, p::AbstractWorkerPool, cache::AbstractCache, c1, c...; kwargs...) = pcmap(a->f(a...), cache, p, zip(c1, c...); kwargs...)
+pcmap(f, p::AbstractWorkerPool, cache::AbstractCache, c1, c...; kwargs...) = pcmap(a->f(a...), p, cache, zip(c1, c...); kwargs...)
 pcmap(f, cache::AbstractCache, c; kwargs...) = pcmap(f, CachingPool(workers()), cache, c; kwargs...)
 pcmap(f, cache::AbstractCache, c1, c...; kwargs...) = pcmap(a->f(a...), cache, zip(c1, c...); kwargs...)
 
