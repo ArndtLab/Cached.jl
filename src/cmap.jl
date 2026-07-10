@@ -85,7 +85,6 @@ The multi-collection form zips the collections and calls `f(x1, x2, ...)`.
 - `c`: Collection of inputs.
 - `distributed`: Whether to dispatch to remote workers (default: `true`).
   Set to `false` to run locally while still using the cache.
-- `batch_size`: Number of items per remote call. Currently only `1` is supported.
 - `on_error`: Called with `(x, e)` when `f(x)` throws. Forwarded to
   `Distributed.pmap`; `nothing` means errors propagate immediately.
 - `retry_delays`: Iterable of delays (seconds) for automatic retry on failure.
