@@ -194,6 +194,33 @@ end
 
 
 
+"""
+    SQLiteCache(path::AbstractString; clear = false)
+
+A cache backend that stores items persistently in a SQLite database at `path`.
+
+`SQLiteCache` keeps an in-memory `loaded` dictionary for values accessed or
+written in the current session, while storing serialized values in a `KeyValue`
+table on disk so results can be reused across Julia sessions.
+
+# Arguments
+- `path`: Path to the SQLite database file.
+- `clear`: If `true`, delete any existing database file at `path` before creating
+  the cache (default: `false`).
+
+# Notes
+- Keys are `UInt64` hashes and values are stored as serialized blobs.
+- The constructor enables a SQLite busy timeout and initializes the table on
+  first use.
+
+# Examples
+```julia
+using Cached
+
+cache = SQLiteCache("results.sqlite")
+results = cmap(x -> x^2, cache, 1:100)
+```
+"""
 mutable struct SQLiteCache <: AbstractCache
     path::String
     db::SQLite.DB
