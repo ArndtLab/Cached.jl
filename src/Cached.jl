@@ -10,7 +10,7 @@ using Distributed
 using ProgressMeter
 
 
-export DictCache, FileCache, SQLiteCache, cmap, pcmap
+export AbstractCache, DictCache, FileCache, SQLiteCache, cmap, pcmap, wrap_cache
 
 
 

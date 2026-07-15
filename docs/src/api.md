@@ -4,6 +4,12 @@ CurrentModule = Cached
 
 # [API Reference](@id api)
 
+## Abstract interface
+
+```@docs
+AbstractCache
+```
+
 ## Cache types
 
 ```@docs

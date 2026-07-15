@@ -1,10 +1,45 @@
+"""
+    AbstractCache
+
+Supertype for all cache backends in `Cached.jl`.
+
+A cache maps `UInt64` hash keys to arbitrary values. Concrete subtypes persist
+results so that expensive function calls can be skipped on subsequent runs —
+even across Julia sessions when a persistent backend is used.
+
+# Interface
+
+Subtypes must implement:
+
+| Method | Description |
+|--------|-------------|
+| `cache[key::UInt64]` | Retrieve a stored value by key. |
+| `cache[key::UInt64] = value` | Store a value under a key. |
+| `haskey(cache, key::UInt64)` | Return `true` if the key exists. |
+| `length(cache)` | Return the number of stored items. |
+
+# Provided subtypes
+
+- [`DictCache`](@ref) — in-memory storage backed by a `Dict`.
+- [`FileCache`](@ref) — persistent storage on disk using `Serialization`.
+- [`SQLiteCache`](@ref) — persistent storage in a SQLite database.
+
+# Examples
+```julia
+using Cached
+
+cache = DictCache()             # or FileCache("dir"), SQLiteCache("db.sqlite")
+cmap(x -> x^2, cache, 1:5)     # compute and cache
+cmap(x -> x^2, cache, 1:5)     # results retrieved from cache, f not called
+```
+"""
 abstract type AbstractCache end
 
 
 Base.show(io::IO, cache::AbstractCache) = print(io, "$(typeof(cache))")
 
 
-function setindices!(cache::AbstractCache, values, keys::Vector{UInt})
+function setindices!(cache::AbstractCache, values, keys::Vector{UInt64})
     for (key, value) in zip(keys, values)
         cache[key] = value
     end
@@ -51,6 +86,11 @@ end
 
 
 
+struct FileCache <: AbstractCache
+    dir::String
+    loaded::Dict{UInt64, Any}
+end
+
 """
     FileCache(dir::AbstractString; clear = false, gitignore = true)
 
@@ -58,9 +98,10 @@ A cache that persists items to disk inside `dir` using Julia's `Serialization` m
 Each item is stored as a separate file named by the hash of its key.
 Items are also cached in memory after first access to avoid redundant deserialization.
 
-If `clear = true`, the directory is removed and recreated on construction.
-If `gitignore = true` (default), a `.gitignore` is written to `dir` so that
-cached files are excluded from version control.
+# Arguments
+- `dir`: Path to the directory where cached files will be stored.
+- `clear`: Remove and recreate the directory if it exists (default: `false`).
+- `gitignore`: Create a `.gitignore` file in the cache directory ignoring all contents (default: `true`).
 
 # Examples
 ```julia
@@ -153,27 +194,6 @@ end
 
 
 
-"""
-    SQLiteCache(path::AbstractString; clear = false)
-
-A cache that persists items to a SQLite database file at `path` using Julia's
-`Serialization` module. Items are also cached in memory after first access to
-avoid redundant deserialization.
-
-SQLite's WAL mode is not enabled by default, but the busy timeout is set to
-1000 ms, making `SQLiteCache` tolerant of brief contention from concurrent processes.
-
-If `clear = true`, any existing database file at `path` is removed before a
-new one is created.
-
-# Examples
-```julia
-using Cached
-
-cache = SQLiteCache("my_cache.sqlite")
-cmap(x -> x^2, cache, 1:5)
-```
-"""
 mutable struct SQLiteCache <: AbstractCache
     path::String
     db::SQLite.DB
