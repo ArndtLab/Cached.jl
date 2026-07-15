@@ -86,11 +86,6 @@ end
 
 
 
-struct FileCache <: AbstractCache
-    dir::String
-    loaded::Dict{UInt64, Any}
-end
-
 """
     FileCache(dir::AbstractString; clear = false, gitignore = true)
 
