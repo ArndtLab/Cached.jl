@@ -1,7 +1,7 @@
 name = "Cached"
 uuid = "43ffbea4-38f1-43a5-9bfb-671206d3a474"
 authors = ["Peter F Arndt <arndt@molgen.mpg.de>"]
-version = "0.5.1"
+version = "0.5.2"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
