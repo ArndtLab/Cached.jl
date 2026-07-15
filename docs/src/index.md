@@ -43,4 +43,19 @@ cache = SQLiteCache("results.sqlite")
 results = pcmap(x -> expensive_fn(x), cache, 1:1000)
 ```
 
-See the [API Reference](@ref api) for full documentation of all types and functions.
+### Caching a single function
+
+[`wrap_cache`](@ref) adds caching to one function at a time, for cases where
+`cmap`/`pcmap` don't fit:
+
+```julia
+cache = SQLiteCache("results.sqlite")
+expensive_fn_cached = wrap_cache(expensive_fn, cache)
+
+expensive_fn_cached(x)  # computed and cached
+expensive_fn_cached(x)  # returned from cache
+```
+
+See the [API Reference](@ref api) for full documentation of all types and functions,
+including the `SQLiteCache` maintenance functions `close!`, `loadall!`, and
+`drop_unused!`.

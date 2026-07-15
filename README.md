@@ -72,6 +72,30 @@ To pre-populate a `SQLiteCache` from an existing `DictCache`:
 disk_cache = SQLiteCache("results.sqlite", mem_cache)
 ```
 
+### Caching a single function
+
+Use `wrap_cache` to add caching to an individual function instead of a `map` call:
+
+```julia
+cache = SQLiteCache("results.sqlite")
+expensive_fn_cached = wrap_cache(expensive_fn, cache)
+
+expensive_fn_cached(x)  # computed and cached
+expensive_fn_cached(x)  # returned from cache
+```
+
+### Managing a `SQLiteCache`
+
+A few unexported functions help manage the on-disk database directly:
+
+```julia
+Cached.close!(cache)     # release the SQLite file handle
+Cached.loadall!(cache)   # load every item into memory
+Cached.drop_unused!(cache)  # delete database rows for keys not currently in memory
+```
+
+See the [API Reference](https://ArndtLab.github.io/Cached.jl/stable/api/) for details.
+
 ## Installation
 
 ```julia

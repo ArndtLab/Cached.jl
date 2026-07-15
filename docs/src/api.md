@@ -24,3 +24,14 @@ pcmap
 ```@docs
 wrap_cache
 ```
+
+## Cache maintenance
+
+These functions are unexported (call them as `Cached.loadall!`, etc.) and
+apply to [`SQLiteCache`](@ref).
+
+```@docs
+Cached.close!
+Cached.loadall!
+Cached.drop_unused!
+```

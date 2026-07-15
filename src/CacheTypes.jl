@@ -75,13 +75,7 @@ struct FileCache <: AbstractCache
     loaded::Dict{UInt64, Any}
 end
 
-"""
-    FileCache(dir::AbstractString; clear = false, gitignore = true)
-
-Creates a cache at `dir`. If `clear` is `true` the directory is removed before creating.
-If `gitignore` is `true` a `.gitignore` file is created in the directory and all its contents will be ignored by git.
-"""
-function FileCache(dir::AbstractString; 
+function FileCache(dir::AbstractString;
     clear = false,
     gitignore = true,)
 
@@ -199,11 +193,6 @@ end
 
 
 
-"""
-    SQLiteCache(path::AbstractString; clear = false)
-
-Creates a SQLite based cache at `path`. If `clear` is `true` the file is removed before creating.
-"""
 function SQLiteCache(path::AbstractString; clear = false)
     if clear && isfile(path)
         rm(path)
@@ -283,6 +272,13 @@ function Base.length(cache::SQLiteCache)
     return count
 end
 
+"""
+    Cached.close!(cache::SQLiteCache)
+
+Close the underlying SQLite database connection. Call this when done with a
+`SQLiteCache` to release the file handle (e.g. before another process needs
+exclusive access); a closed cache should not be used again.
+"""
 function close!(cache::SQLiteCache)
     DBInterface.close!(cache.db)
 end
