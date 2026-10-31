@@ -80,6 +80,41 @@ end
 end
 
 
+@testitem "SQLiteCache UInt64 keys" begin
+    mktempdir() do d
+        path = joinpath(d, "high-key.sqlite")
+        key = UInt64(0xf45a17f5335c9a08)
+        cache = Cached.SQLiteCache(path)
+
+        cache[key] = "single"
+        @test haskey(cache, key)
+        @test cache[key] == "single"
+
+        batch_key = UInt64(0xb795033f6f2a0674)
+        Cached.setindices!(cache, ["batch"], [batch_key])
+        @test cache[batch_key] == "batch"
+        channel_key = UInt64(0x8000000000000001)
+        channel = Channel{Tuple{UInt64, Any}}(1)
+        put!(channel, (channel_key, "channel"))
+        Cached.setindices!(cache, channel)
+        Cached.close!(cache)
+
+        cache = Cached.SQLiteCache(path)
+        @test haskey(cache, key)
+        @test cache[key] == "single"
+        @test cache[batch_key] == "batch"
+        @test cache[channel_key] == "channel"
+        Cached.loadall!(cache)
+        @test cache.loaded[key] == "single"
+        @test cache.loaded[batch_key] == "batch"
+        @test cache.loaded[channel_key] == "channel"
+
+        Cached.drop_unused!(cache)
+        @test length(cache) == 3
+    end
+end
+
+
 @testitem "SqliteCache Droping" begin
     objs = [true, false, 2, 3.0, π, (1,2), (3.1415, π), [1,2,3], [π, 3.1415], 
 			Dict(1=>2, 3=>4), Dict(π=>3.1415, 3.1415=>π), 
@@ -379,7 +414,6 @@ end
 	@test length(c) == 100
 
 end
-
 
 
 
