@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 'lts'
+          # - 'lts' Distributeted needs 1.11
           - '1.11'
           - '1'
           - 'pre'
