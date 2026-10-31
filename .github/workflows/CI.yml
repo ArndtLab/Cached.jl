@@ -23,8 +23,9 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          # - '1.10' Distributed needs 1.11
+          - 'lts'
           - '1.11'
+          - '1'
           - 'pre'
         os:
           - ubuntu-latest
