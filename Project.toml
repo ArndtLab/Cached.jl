@@ -12,6 +12,6 @@ Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 [compat]
 Distributed = "1.11.0"
 ProgressMeter = "1.10.4"
-SQLite = "1.6.1"
+SQLite = "1.9"
 Serialization = "1.11.0"
 julia = "1.11"
