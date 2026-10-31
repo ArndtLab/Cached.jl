@@ -262,10 +262,11 @@ end
 
 Base.show(io::IO, cache::SQLiteCache) = print(io, "$(typeof(cache)) at $(cache.path)")
 
+sqlite_key(key::UInt64) = reinterpret(Int64, key)
 
 function Base.getindex(cache::SQLiteCache, key::UInt64)
     get!(cache.loaded, key) do
-        res = first(first(DBInterface.execute(cache.read_statement, (key,))))
+        res = first(first(DBInterface.execute(cache.read_statement, (sqlite_key(key),))))
         io = IOBuffer(res, read = true, write = false)
         deserialize(io)
     end
@@ -275,7 +276,7 @@ function Base.setindex!(cache::SQLiteCache, value, key::UInt64)
     cache.loaded[key] = value
     io = IOBuffer()
     serialize(io, value)
-    DBInterface.execute(cache.write_statement, (key, take!(io)))
+    DBInterface.execute(cache.write_statement, (sqlite_key(key), take!(io)))
 end
 
 function setindices!(cache::SQLiteCache, values, keys::Vector{UInt64})
@@ -286,7 +287,7 @@ function setindices!(cache::SQLiteCache, values, keys::Vector{UInt64})
         take!(io)
     end
     # this is a lot faster
-    DBInterface.executemany(cache.write_statement, (keys, svalues))
+    DBInterface.executemany(cache.write_statement, (sqlite_key.(keys), svalues))
 end
 
 
@@ -298,14 +299,14 @@ function setindices!(cache::SQLiteCache, kv::Union{Channel,RemoteChannel})
             cache.loaded[key] = value
             io = IOBuffer()
             serialize(io, value)
-            DBInterface.execute(cache.write_statement, (key, take!(io)))
+            DBInterface.execute(cache.write_statement, (sqlite_key(key), take!(io)))
         end
     end
 end
 
 
 function Base.haskey(cache::SQLiteCache, key::UInt64)
-    haskey(cache.loaded, key) || !isempty(DBInterface.execute(cache.haskey_statement, (key,)))
+    haskey(cache.loaded, key) || !isempty(DBInterface.execute(cache.haskey_statement, (sqlite_key(key),)))
 end
 
 function Base.length(cache::SQLiteCache)
@@ -336,7 +337,7 @@ function loadall!(cache::SQLiteCache)
     res = DBInterface.execute(s)
 
     for row in res
-        key = row[1]
+        key = reinterpret(UInt64, row[1])
         value = row[2]
         io = IOBuffer(value, read=true, write=false)
         cache.loaded[key] = deserialize(io)
@@ -352,7 +353,7 @@ end
 Drop all items from the SQLite database that are not in memory.
 """
 function drop_unused!(cache::SQLiteCache)
-    valid_ids = collect(keys(cache.loaded))
+    valid_ids = sqlite_key.(collect(keys(cache.loaded)))
 
     # Build the SQL query with placeholders
     placeholders = join(("?" for _ in valid_ids), ", ")
@@ -372,5 +373,4 @@ function Base.summary(io::IO, cache::SQLiteCache)
     print(io, "$(typeof(cache)) at $(cache.path)")
     print(io, ": $(length(cache.loaded)) items in memory, $(length(cache)) items on disk, $(human_size) on disk")
 end 
-
 
