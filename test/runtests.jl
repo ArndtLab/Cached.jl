@@ -353,30 +353,24 @@ end
 	f(i) = (getpid(), gethostname(), i, global k+=1)
 	r = Cached.cmap(f, c, 1:10)
 	@test length(r) == 10
-	@test length(unique(getindex.(r, 1))) == 1
-	@test length(unique(getindex.(r, 2))) == 1
-	@test length(unique(getindex.(r, 3))) == 10
-	@test length(unique(getindex.(r, 4))) == 10
+	@test all(x -> x[1] == first(r)[1], r)
+	@test all(x -> x[2] == first(r)[2], r)
 	@test getindex.(r, 3) == collect(1:10)
 	@test getindex.(r, 4) == collect(1:10)
 	@test k == 10
 
 	r = Cached.cmap(f, c, 1:10)
 	@test length(r) == 10
-	@test length(unique(getindex.(r, 1))) == 1
-	@test length(unique(getindex.(r, 2))) == 1
-	@test length(unique(getindex.(r, 3))) == 10
-	@test length(unique(getindex.(r, 4))) == 10
+	@test all(x -> x[1] == first(r)[1], r)
+	@test all(x -> x[2] == first(r)[2], r)
 	@test getindex.(r, 3) == collect(1:10)
 	@test getindex.(r, 4) == collect(1:10)
 	@test k == 10
 
 	r = map(f, 1:10)
 	@test length(r) == 10
-	@test length(unique(getindex.(r, 1))) == 1
-	@test length(unique(getindex.(r, 2))) == 1
-	@test length(unique(getindex.(r, 3))) == 10
-	@test length(unique(getindex.(r, 4))) == 10
+	@test all(x -> x[1] == first(r)[1], r)
+	@test all(x -> x[2] == first(r)[2], r)
 	@test getindex.(r, 3) == collect(1:10)
 	@test getindex.(r, 4) == collect(11:20)
 	@test k == 20
@@ -414,6 +408,5 @@ end
 	@test length(c) == 100
 
 end
-
 
 
